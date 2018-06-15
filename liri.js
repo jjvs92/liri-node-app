@@ -7,8 +7,11 @@ var request = require("request");
 var fs = require("fs");
 var spotifyClient = new spotify(keys.spotify);
 var twitterClient = new twitter(keys.twitter);
-
+var nodeArgs = process.argv;
 var command = process.argv[2];
+var track= "";
+var movie= "";
+var spotParam = process.argv[3];
 
 
 if(command === "my-tweets"){
@@ -17,14 +20,10 @@ if(command === "my-tweets"){
     twitterClient.get('statuses/user_timeline', params, function(error, tweets, response) {
         if (!error) {
             // console.log(tweets)
-            console.log('');
-            console.log('My Last 20 Tweets: ');
-            console.log('--------------------------');
+            console.log("");
+            console.log("My Last 20 Tweets: " +"\n--------------------------");
             tweets.forEach(function(individualTweet) {
-                console.log('Time Posted: ' + individualTweet.created_at);
-                console.log('Tweet: ' + individualTweet.text);
-                console.log('--------------------------');
-            
+                console.log("Time Posted: " + individualTweet.created_at + "\nTweet: " + individualTweet.text + "\n--------------------------");            
             });
             
         } else {
@@ -32,7 +31,28 @@ if(command === "my-tweets"){
             };
     })
 } else if(command === "spotify-this-song"){
-    var track = process.argv[3];
+        for(var i =3; i < nodeArgs.length; i++){
+            track += nodeArgs[i] + " ";
+        } 
+        if (!spotParam){
+            // console.log("test");
+            spotifyClient.search({ type: 'track', query: "The Sign"}, function(err, data) {
+                if (err) {
+                    return console.log('Error occurred: ' + err);
+                }
+                    // artists' name
+                    console.log("The artist for this track is " + data.tracks.items[6].artists[0].name);  
+                    // Song title
+                    console.log("The title of this track is " + data.tracks.items[6].name)     
+                    // Preview link 
+                    console.log("You can find a preview of the track at " + data.tracks.items[6].preview_url)
+                    // THe album this track is on 
+                    console.log("The album this track is on " + data.tracks.items[6].album.name)
+                })            
+
+                           
+
+        }else{
         spotifyClient.search({ type: 'track', query: track }, function(err, data) {
         if (err) {
             return console.log('Error occurred: ' + err);
@@ -45,9 +65,12 @@ if(command === "my-tweets"){
             console.log("You can find a preview of the track at " + data.tracks.items[0].preview_url)
             // THe album this track is on 
             console.log("The album this track is on " + data.tracks.items[0].album.name)
-        })
+        })}
 } else if(command === "movie-this"){
-    var movie = process.argv[3];
+    for(var i = 3; i < nodeArgs.length; i++){
+        movie += nodeArgs[i] + " ";
+    }
+    console.log(movie)
     
     if(!movie){
         request("http://www.omdbapi.com/?t=Mr.Nobody&plot=short&apikey=trilogy", function(error, response, body) {
@@ -62,7 +85,7 @@ if(command === "my-tweets"){
               console.log("Movie was produced in: " + JSON.parse(body).Country);
               console.log("Available languages: " + JSON.parse(body).Language);
               console.log("movie plot: " + JSON.parse(body).Plot);
-              console.log("Actors: " + JSON.parse(body).Actors);        
+              console.log("Actors: " + JSON.parse(body).Actors + "\n");        
 
             }
         })
@@ -79,7 +102,7 @@ if(command === "my-tweets"){
                 console.log("Movie was produced in: " + JSON.parse(body).Country);
                 console.log("Available languages: " + JSON.parse(body).Language);
                 console.log("movie plot: " + JSON.parse(body).Plot);
-                console.log("Actors: " + JSON.parse(body).Actors);
+                console.log("Actors: " + JSON.parse(body).Actors + "\n");
             }
         })
     }         
@@ -88,10 +111,24 @@ if(command === "my-tweets"){
         if(error){
             console.log("Error");
         } else{
-            console.log(data);
             var dataArr = data.split(",");
-            console.log(dataArr);
-            console.log(dataArr[0]);
+            track = dataArr[1];
+ 
+            console.log(track);
+            spotifyClient.search({ type: 'track', query: track}, function(err, data) {
+                if (err) {
+                    return console.log('Error occurred: ' + err);
+                }
+                    // artists' name
+                    console.log("The artist for this track is " + data.tracks.items[6].artists[0].name);  
+                    // Song title
+                    console.log("The title of this track is " + data.tracks.items[6].name)     
+                    // Preview link 
+                    console.log("You can find a preview of the track at " + data.tracks.items[6].preview_url)
+                    // THe album this track is on 
+                    console.log("The album this track is on " + data.tracks.items[6].album.name)
+                })               
+
         }
     })
 }
